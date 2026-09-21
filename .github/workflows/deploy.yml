@@ -1,0 +1,57 @@
+name: Hidden Build and Deploy
+
+on:
+  repository_dispatch:
+    types: [build_site]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Private Code
+        uses: actions/checkout@v4
+        with:
+          repository: HimanshuTyagiJi/TyagiHubFinalPrivate
+          token: ${{ secrets.DEPLOY_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Custom Jekyll
+        run: |
+          node build.js
+          node build-discover.js
+          node build-gkquiz.js
+          node build-shield.js
+          node build-testcenter.js
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

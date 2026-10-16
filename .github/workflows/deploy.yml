@@ -35,10 +35,6 @@ jobs:
       - name: Build Custom Jekyll
         run: |
           node build.js
-          node build-discover.js
-          node build-gkquiz.js
-          node build-shield.js
-          node build-testcenter.js
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
